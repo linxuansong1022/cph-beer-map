@@ -5,7 +5,6 @@ import Sidebar from '../components/Sidebar';
 import AddPlaceModal from '../components/AddPlaceModal';
 import { useState, useEffect } from 'react';
 import { BeerSpot } from '../types/place';
-import { places } from '../data/places';
 
 // Dynamic import with ssr: false to prevent window is not defined error
 const Map = dynamic(() => import('../components/Map'), { 
@@ -14,7 +13,7 @@ const Map = dynamic(() => import('../components/Map'), {
 });
 
 export default function Home() {
-  const [allPlaces, setAllPlaces] = useState<BeerSpot[]>(places);
+  const [allPlaces, setAllPlaces] = useState<BeerSpot[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<BeerSpot | null>(null);
   
   // State for the new place modal
@@ -34,6 +33,27 @@ export default function Home() {
     }
   }, []);
 
+  // Fetch places from Backend API
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/places')
+      .then((res) => res.json())
+      .then((data) => {
+        // Map backend data to frontend BeerSpot type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const mappedPlaces: BeerSpot[] = data.map((p: any) => ({
+          id: p.slug, // Use slug as string ID
+          name: p.name,
+          description: p.description,
+          position: p.position,
+          category: p.category,
+          website: p.website,
+          logoUrl: p.logo_url, // Map snake_case to camelCase
+        }));
+        setAllPlaces(mappedPlaces);
+      })
+      .catch((err) => console.error('Failed to fetch places:', err));
+  }, []);
+
   // Triggered when user clicks on the map
   const handleMapClick = (lat: number, lng: number) => {
     if (!isAddingMode) return;
@@ -44,18 +64,53 @@ export default function Home() {
   };
 
   // Triggered when user submits the modal form
-  const handleSavePlace = (data: Omit<BeerSpot, "id" | "position">) => {
+  const handleSavePlace = async (data: Omit<BeerSpot, "id" | "position">) => {
     if (!tempPosition) return;
 
-    const newPlace: BeerSpot = {
-      id: Date.now().toString(),
-      position: tempPosition,
-      ...data
+    const slug = Date.now().toString(); // Use timestamp as a simple unique slug
+
+    const payload = {
+      slug: slug,
+      name: data.name,
+      description: data.description,
+      category: data.category,
+      website: data.website,
+      logo_url: data.logoUrl,
+      lat: tempPosition[0],
+      lng: tempPosition[1]
     };
 
-    setAllPlaces([...allPlaces, newPlace]);
-    setIsModalOpen(false);
-    setTempPosition(null);
+    try {
+      const res = await fetch('http://127.0.0.1:8000/places', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const savedPlace = await res.json();
+        // Convert back to BeerSpot
+        const newSpot: BeerSpot = {
+          id: savedPlace.slug,
+          name: savedPlace.name,
+          description: savedPlace.description,
+          position: savedPlace.position,
+          category: savedPlace.category,
+          website: savedPlace.website,
+          logoUrl: savedPlace.logo_url
+        };
+
+        setAllPlaces([...allPlaces, newSpot]);
+        setIsModalOpen(false);
+        setTempPosition(null);
+      } else {
+        console.error("Failed to save place");
+      }
+    } catch (err) {
+      console.error("Error saving place:", err);
+    }
   };
 
   return (
