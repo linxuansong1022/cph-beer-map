@@ -60,27 +60,30 @@ export default function Home() {
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
+
+      {/* Toggle Sidebar Button - Moved to Main container */}
+      <button 
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className={`
+          fixed top-4 z-[9999] bg-white/90 backdrop-blur-sm text-gray-700 p-3 rounded-full shadow-md hover:bg-gray-100 transition-all duration-300 left-4
+          ${isSidebarOpen ? 'md:left-[21rem]' : ''}
+        `}
+        aria-label="Toggle Menu"
+      >
+        {isSidebarOpen ? (
+          // Close / Chevron Left Icon (Desktop only)
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        ) : (
+          // Hamburger Menu Icon
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        )}
+      </button>
       
       <div className="flex-1 relative h-full transition-all duration-300">
-        {/* Toggle Sidebar Button */}
-        <button 
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={`absolute top-4 left-4 z-50 bg-white p-3 rounded-full shadow-md hover:bg-gray-100 transition-transform duration-300 ${isSidebarOpen ? 'md:left-[21rem]' : 'left-4'}`}
-          aria-label="Toggle Menu"
-        >
-          {isSidebarOpen ? (
-            // Close / Chevron Left Icon
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          ) : (
-            // Hamburger Menu Icon
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
-        </button>
-
         <Map 
           places={allPlaces} 
           selectedPosition={selectedPlace?.position} 
