@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Sidebar from '../components/Sidebar';
 import AddPlaceModal from '../components/AddPlaceModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BeerSpot } from '../types/place';
 import { places } from '../data/places';
 
@@ -20,6 +20,16 @@ export default function Home() {
   // State for the new place modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tempPosition, setTempPosition] = useState<[number, number] | null>(null);
+
+  // State for sidebar (responsive)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Open sidebar by default on large screens
+  useEffect(() => {
+    if (window.innerWidth >= 768) {
+      setIsSidebarOpen(true);
+    }
+  }, []);
 
   // Triggered when user clicks on the map
   const handleMapClick = (lat: number, lng: number) => {
@@ -43,9 +53,34 @@ export default function Home() {
   };
 
   return (
-    <main className="flex h-screen w-screen overflow-hidden">
-      <Sidebar places={allPlaces} onSelect={(place) => setSelectedPlace(place)} />
-      <div className="flex-1 relative h-full">
+    <main className="flex h-screen w-screen overflow-hidden relative">
+      <Sidebar 
+        places={allPlaces} 
+        onSelect={(place) => setSelectedPlace(place)} 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+      
+      <div className="flex-1 relative h-full transition-all duration-300">
+        {/* Toggle Sidebar Button */}
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className={`absolute top-4 left-4 z-50 bg-white p-3 rounded-full shadow-md hover:bg-gray-100 transition-transform duration-300 ${isSidebarOpen ? 'md:left-[21rem]' : 'left-4'}`}
+          aria-label="Toggle Menu"
+        >
+          {isSidebarOpen ? (
+            // Close / Chevron Left Icon
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          ) : (
+            // Hamburger Menu Icon
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+
         <Map 
           places={allPlaces} 
           selectedPosition={selectedPlace?.position} 
