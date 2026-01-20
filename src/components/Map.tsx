@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, ZoomControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { BeerSpot } from "../types/place";
@@ -70,12 +70,14 @@ export default function Map({ places, selectedPosition, onAddPlace }: MapProps) 
     <MapContainer 
       center={[55.6761, 12.5683]} 
       zoom={13} 
+      zoomControl={false}
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer
         attribution='&copy; OpenStreetMap contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      <ZoomControl position="bottomright" />
 
       {/* Component to detect clicks - now triggers adding a place */}
       <MapClickHandler onMapClick={(latlng) => onAddPlace(latlng.lat, latlng.lng)} />

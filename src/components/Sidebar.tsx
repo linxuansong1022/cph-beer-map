@@ -20,7 +20,7 @@ export default function Sidebar({ places, onSelect, isOpen, onClose }: SidebarPr
 
       {/* Sidebar Container */}
       <div className={`
-        fixed md:relative inset-y-0 left-0 z-40 bg-white border-r border-gray-200 shadow-2xl md:shadow-none
+        fixed md:relative inset-y-0 left-0 z-40 h-full bg-white border-r border-gray-200 shadow-2xl md:shadow-none
         transition-all duration-300 ease-in-out overflow-hidden
         ${isOpen ? 'translate-x-0 w-80 p-4' : '-translate-x-full w-0 p-0 border-none md:translate-x-0 md:w-0'}
       `}>
