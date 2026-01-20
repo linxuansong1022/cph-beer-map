@@ -24,6 +24,9 @@ export default function Home() {
   // State for sidebar (responsive)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // State for adding mode
+  const [isAddingMode, setIsAddingMode] = useState(false);
+
   // Open sidebar by default on large screens
   useEffect(() => {
     if (window.innerWidth >= 768) {
@@ -33,8 +36,11 @@ export default function Home() {
 
   // Triggered when user clicks on the map
   const handleMapClick = (lat: number, lng: number) => {
+    if (!isAddingMode) return;
+
     setTempPosition([lat, lng]);
     setIsModalOpen(true);
+    setIsAddingMode(false); // Exit adding mode after clicking
   };
 
   // Triggered when user submits the modal form
@@ -59,6 +65,8 @@ export default function Home() {
         onSelect={(place) => setSelectedPlace(place)} 
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        isAddingMode={isAddingMode}
+        onToggleAddingMode={() => setIsAddingMode(!isAddingMode)}
       />
 
       {/* Toggle Sidebar Button - Moved to Main container */}
@@ -88,6 +96,7 @@ export default function Home() {
           places={allPlaces} 
           selectedPosition={selectedPlace?.position} 
           onAddPlace={handleMapClick}
+          isAddingMode={isAddingMode}
         />
       </div>
 
