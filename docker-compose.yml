@@ -1,0 +1,31 @@
+services:
+  # 数据库服务
+  db:
+    # 使用带有 PostGIS 插件的 PostgreSQL 镜像，专门优化地图/地理查询
+    image: postgis/postgis:15-3.4-alpine
+    container_name: cph_beer_db
+    restart: always
+    environment:
+      # 这里设置数据库的账号密码，你在 backend/app/database.py 连接时要用到
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: cph_beer_map
+    ports:
+      # 端口映射：主机端口:容器端口
+      # 这样你就可以通过 localhost:5432 连接到容器里的数据库
+      - "5432:5432"
+    volumes:
+      # 数据持久化：防止重启容器后数据丢失
+      - postgres_data:/var/lib/postgresql/data
+
+  # 缓存与消息队列服务 (为 Celery 准备)
+  redis:
+    image: redis:alpine
+    container_name: cph_beer_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+# 定义数据卷
+volumes:
+  postgres_data:

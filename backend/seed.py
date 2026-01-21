@@ -1,6 +1,11 @@
-import requests
+from sqlalchemy.orm import Session
+from app.database import SessionLocal, engine
+from app import models
 
-# 原始数据 (从 src/data/places.ts 复制)
+# Initialize database tables (ensure they exist)
+models.Base.metadata.create_all(bind=engine)
+
+# Data to seed
 places_data = [
   {
     "slug": "warpigs",
@@ -43,21 +48,31 @@ places_data = [
   }
 ]
 
-API_URL = "http://127.0.0.1:8000/places"
-
 def seed_db():
-    print(f"Adding places to {API_URL}...")
-    for place in places_data:
-        try:
-            response = requests.post(API_URL, json=place)
-            if response.status_code == 200:
-                print(f"✅ Added: {place['name']}")
-            elif response.status_code == 400 and "already exists" in response.text:
-                 print(f"⚠️ Skipped (Already exists): {place['name']}")
-            else:
-                print(f"❌ Failed: {place['name']} - {response.status_code} {response.text}")
-        except Exception as e:
-            print(f"❌ Error connecting to API: {e}")
+    db = SessionLocal()
+    try:
+        print("Seeding database...")
+        for place_data in places_data:
+            # Check if place already exists by slug
+            existing_place = db.query(models.Place).filter(models.Place.slug == place_data["slug"]).first()
+            
+            if existing_place:
+                print(f"Skipping {place_data['name']} (already exists)")
+                continue
+
+            # Create new Place object
+            new_place = models.Place(**place_data)
+            db.add(new_place)
+            print(f"Adding {place_data['name']}")
+        
+        db.commit()
+        print("Seeding completed successfully.")
+        
+    except Exception as e:
+        print(f"Error seeding database: {e}")
+        db.rollback()
+    finally:
+        db.close()
 
 if __name__ == "__main__":
     seed_db()
