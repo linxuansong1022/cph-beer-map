@@ -69,13 +69,21 @@ export default function Home() {
 
     const slug = Date.now().toString(); // Use timestamp as a simple unique slug
 
+    // Generate a default logo if none provided
+    let finalLogoUrl = data.logoUrl;
+    if (!finalLogoUrl) {
+      // Use UI Avatars API to generate a placeholder based on the name
+      // background=random makes it colorful
+      finalLogoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=random&color=fff&size=128&bold=true`;
+    }
+
     const payload = {
       slug: slug,
       name: data.name,
       description: data.description,
       category: data.category,
       website: data.website,
-      logo_url: data.logoUrl,
+      logo_url: finalLogoUrl,
       lat: tempPosition[0],
       lng: tempPosition[1]
     };

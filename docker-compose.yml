@@ -2,7 +2,8 @@ services:
   # 数据库服务
   db:
     # 使用带有 PostGIS 插件的 PostgreSQL 镜像，专门优化地图/地理查询
-    image: postgis/postgis:15-3.4-alpine
+    # 去掉 -alpine 后缀，使用 Debian 基础镜像，对 Mac M1/M2/M3 兼容性更好
+    image: postgis/postgis:15-3.4
     container_name: cph_beer_db
     restart: always
     environment:
