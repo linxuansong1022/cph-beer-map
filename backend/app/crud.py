@@ -20,3 +20,11 @@ def create_place(db: Session, place: schemas.PlaceCreate):
     db.commit()
     db.refresh(db_place)
     return db_place
+
+def delete_place_by_slug(db: Session, slug: str):
+    db_place = db.query(models.Place).filter(models.Place.slug == slug).first()
+    if db_place:
+        db.delete(db_place)
+        db.commit()
+        return True
+    return False
