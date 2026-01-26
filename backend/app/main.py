@@ -103,3 +103,19 @@ def delete_place(slug: str, db: Session = Depends(database.get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="Place not found")
     return {"message": "Place deleted successfully"}
+
+@app.get("/places/nearby", response_model=List[schemas.PlaceResponse])
+def read_places_nearby(lat: float, lng: float, radius: int = 2000, db: Session = Depends(database.get_db)):
+    """
+    Finds places within a certain radius (in meters) of a coordinate.
+    Uses PostGIS for efficient spatial querying.
+    """
+    return crud.get_places_nearby(db, lat=lat, lng=lng, radius_meters=radius)
+
+@app.get("/places/nearby", response_model=List[schemas.PlaceResponse])
+def read_places_nearby(lat: float, lng: float, radius: int = 2000, db: Session = Depends(database.get_db)):
+    """
+    Finds places within a certain radius (in meters) of a coordinate.
+    Uses PostGIS for efficient spatial querying.
+    """
+    return crud.get_places_nearby(db, lat=lat, lng=lng, radius_meters=radius)

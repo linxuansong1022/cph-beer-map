@@ -7,9 +7,10 @@ interface SidebarProps {
   onClose: () => void;
   isAddingMode?: boolean;
   onToggleAddingMode?: () => void;
+  onDelete: (id: string) => void;
 }
 
-export default function Sidebar({ places, onSelect, isOpen, onClose, isAddingMode, onToggleAddingMode }: SidebarProps) {
+export default function Sidebar({ places, onSelect, isOpen, onClose, isAddingMode, onToggleAddingMode, onDelete }: SidebarProps) {
   return (
     <>
       {/* Mobile Overlay (Background Dim) */}
@@ -78,13 +79,29 @@ export default function Sidebar({ places, onSelect, isOpen, onClose, isAddingMod
             >
               <div className="flex justify-between items-start">
                 <h2 className="font-bold text-gray-900">{place.name}</h2>
-                <span className={`text-xs px-2 py-1 rounded-full capitalize ${
-                  place.category === 'brewery' ? 'bg-red-100 text-red-800' :
-                  place.category === 'shop' ? 'bg-green-100 text-green-800' :
-                  'bg-blue-100 text-blue-800'
-                }`}>
-                  {place.category}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs px-2 py-1 rounded-full capitalize ${
+                    place.category === 'brewery' ? 'bg-red-100 text-red-800' :
+                    place.category === 'shop' ? 'bg-green-100 text-green-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {place.category}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm(`Are you sure you want to delete ${place.name}?`)) {
+                        onDelete(place.id);
+                      }
+                    }}
+                    className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                    title="Delete place"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
               </div>
               
               {place.description && (

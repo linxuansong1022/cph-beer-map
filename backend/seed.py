@@ -55,8 +55,6 @@ def seed_db():
         print("Seeding database...")
         for place_data in places_data:
             # Check if place already exists by slug
-            existing_place = db.query(models.Place).filter(models.Place.slug == place.slug).first() # NOTE: Typo in original file "place.slug", assuming user's file might have "place_data['slug']" or similar if they copied correctly. But wait, in the read file previously it was place_data['slug']. Let me use robust code.
-            # Actually, I'll stick to the exact previous working logic structure.
             existing_place = db.query(models.Place).filter(models.Place.slug == place_data["slug"]).first()
             
             if existing_place:

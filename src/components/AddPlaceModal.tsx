@@ -10,6 +10,7 @@ interface AddPlaceModalProps {
 export default function AddPlaceModal({ isOpen, onClose, onSave }: AddPlaceModalProps) {
   const [name, setName] = useState("");
   const [category, setCategory] = useState<BeerSpot["category"]>("bar");
+  const [website, setWebsite] = useState("");
   const [description, setDescription] = useState("");
 
   if (!isOpen) return null;
@@ -21,12 +22,14 @@ export default function AddPlaceModal({ isOpen, onClose, onSave }: AddPlaceModal
     onSave({
       name,
       category,
+      website,
       description
     });
     
     // Reset form
     setName("");
     setCategory("bar");
+    setWebsite("");
     setDescription("");
   };
 
@@ -60,6 +63,17 @@ export default function AddPlaceModal({ isOpen, onClose, onSave }: AddPlaceModal
               <option value="brewery">Brewery 🏭</option>
               <option value="shop">Shop 🛍️</option>
             </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Website (Optional)</label>
+            <input
+              type="url"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+              placeholder="e.g. https://example.com"
+            />
           </div>
 
           <div className="mb-6">
