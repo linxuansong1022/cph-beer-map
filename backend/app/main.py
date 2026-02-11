@@ -4,6 +4,11 @@ from typing import List
 import requests
 from . import models, schemas, crud, database
 from fastapi.middleware.cors import CORSMiddleware
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Create database tables
 models.Base.metadata.create_all(bind=database.engine)
@@ -20,8 +25,7 @@ app.add_middleware(
 )
 
 # --- Google Places API Configuration ---
-# TODO: Replace with your actual API Key or load from environment variable
-GOOGLE_API_KEY = "AIzaSyDQ6-MjS8UPSRMrJ8xYqs6sEXQ4WJCWLdI"
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 def get_google_photo_url(query: str) -> str | None:
     """

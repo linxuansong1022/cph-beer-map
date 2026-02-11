@@ -1,19 +1,25 @@
+# -*- coding: utf-8 -*-
 import requests
 import time
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine
 from app import models
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize database
 models.Base.metadata.create_all(bind=engine)
 
 # --- CONFIGURATION ---
 # Replace with your actual API Key
-GOOGLE_API_KEY = "AIzaSyDQ6-MjS8UPSRMrJ8xYqs6sEXQ4WJCWLdI"
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 # Copenhagen City Center
 CENTER_LAT = 55.6761
 CENTER_LNG = 12.5683
-RADIUS = 5000  # 5km radius
+RADIUS = 20000  # 20km radius (Expanded!)
 KEYWORD = "craft beer"
 
 def import_bars():
@@ -29,18 +35,22 @@ def import_bars():
     }
 
     try:
-        print(f"🌍 Searching for '{KEYWORD}' bars within {RADIUS}m of Copenhagen...")
+        print(f"[INFO] Searching for '{KEYWORD}' bars within {RADIUS}m of Copenhagen...")
         
         while True:
             response = requests.get(url, params=params)
             data = response.json()
             
             if data.get("status") != "OK":
-                print(f"❌ API Error: {data.get('status')} - {data.get('error_message')}")
+                # Check if it is just zero results, which is fine
+                if data.get("status") == "ZERO_RESULTS":
+                    print("[INFO] No more results found.")
+                    break
+                print(f"[ERROR] API Error: {data.get('status')} - {data.get('error_message')}")
                 break
 
             results = data.get("results", [])
-            print(f"📦 Found {len(results)} places in this page.")
+            print(f"[INFO] Found {len(results)} places in this page.")
 
             for place in results:
                 process_place(db, place)
@@ -53,17 +63,17 @@ def import_bars():
             if not next_page_token:
                 break
             
-            print("⏳ Waiting for next page token to become valid...")
+            print("[WAIT] Waiting for next page token to become valid...")
             time.sleep(2) # Google requires a short delay before next_page_token is valid
             params = {
                 "pagetoken": next_page_token,
                 "key": GOOGLE_API_KEY
             }
 
-        print("✅ Import completed!")
+        print("[SUCCESS] Import completed!")
 
     except Exception as e:
-        print(f"❌ Unexpected Error: {e}")
+        print(f"[ERROR] Unexpected Error: {e}")
     finally:
         db.close()
 
@@ -74,7 +84,7 @@ def process_place(db: Session, place_data):
     # Check duplicates
     existing = db.query(models.Place).filter(models.Place.name == name).first()
     if existing:
-        print(f"   ⚠️ Skipping {name} (Already exists)")
+        print(f"   [SKIP] {name} (Already exists)")
         return
 
     # Extract details
@@ -99,7 +109,7 @@ def process_place(db: Session, place_data):
     new_place = models.Place(
         slug=slug,
         name=name,
-        description=f"Rating: {rating} ⭐ ({user_ratings_total} reviews)", # Simple description
+        description=f"Rating: {rating} ({user_ratings_total} reviews)", # Removed star emoji just in case
         lat=lat,
         lng=lng,
         category="bar", # Default to bar
@@ -111,7 +121,7 @@ def process_place(db: Session, place_data):
     )
     
     db.add(new_place)
-    print(f"   ✅ Added: {name}")
+    print(f"   [ADDED] {name}")
 
 if __name__ == "__main__":
     import_bars()
